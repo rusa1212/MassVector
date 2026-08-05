@@ -1,4 +1,4 @@
-import type { Stock } from "@/lib/types";
+import type { Market, Stock } from "@/lib/types";
 
 export const stocks: Stock[] = [
   {
@@ -105,4 +105,24 @@ export function getStockById(id: string): Stock | undefined {
 
 export function getPopularStocks(): Stock[] {
   return stocks.filter((stock) => stock.popular);
+}
+
+export function getAllStocks(): Stock[] {
+  return stocks;
+}
+
+export function searchStocks(query: string, market: Market | "전체" = "전체"): Stock[] {
+  const q = query.trim().toLowerCase();
+  return stocks.filter((stock) => {
+    const matchesQuery =
+      q === "" ||
+      stock.name.toLowerCase().includes(q) ||
+      stock.ticker.toLowerCase().includes(q);
+    const matchesMarket = market === "전체" || stock.market === market;
+    return matchesQuery && matchesMarket;
+  });
+}
+
+export function getStocksByIds(ids: string[]): Stock[] {
+  return stocks.filter((stock) => ids.includes(stock.id));
 }

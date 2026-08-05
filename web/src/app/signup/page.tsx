@@ -14,16 +14,35 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmError, setConfirmError] = useState("");
+
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (password !== confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.");
+
+    const nextNameError = name.trim() ? "" : "이름을 입력해주세요.";
+    const nextEmailError = EMAIL_PATTERN.test(email)
+      ? ""
+      : "올바른 이메일 형식이 아니에요.";
+    const nextPasswordError =
+      password.length >= 8 ? "" : "비밀번호는 8자 이상이어야 해요.";
+    const nextConfirmError =
+      password === confirmPassword ? "" : "비밀번호가 일치하지 않습니다.";
+
+    setNameError(nextNameError);
+    setEmailError(nextEmailError);
+    setPasswordError(nextPasswordError);
+    setConfirmError(nextConfirmError);
+    if (nextNameError || nextEmailError || nextPasswordError || nextConfirmError) {
       return;
     }
+
     // 회원가입 기능은 추후 백엔드 연동 예정 — 현재는 화면 흐름 확인용 임시 처리
-    signup(name || "새 사용자", email || "guest@example.com");
+    signup(name, email);
     router.push("/mypage");
   };
 
@@ -41,6 +60,7 @@ export default function SignupPage() {
           placeholder="홍길동"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          error={nameError}
           required
         />
         <Input
@@ -50,6 +70,7 @@ export default function SignupPage() {
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          error={emailError}
           required
         />
         <Input
@@ -59,6 +80,7 @@ export default function SignupPage() {
           placeholder="********"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={passwordError}
           required
         />
         <Input
@@ -68,7 +90,7 @@ export default function SignupPage() {
           placeholder="********"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          error={error}
+          error={confirmError}
           required
         />
         <Button type="submit">회원가입</Button>
@@ -81,11 +103,11 @@ export default function SignupPage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Button variant="outline" type="button">
-          Google로 계속하기
+        <Button variant="outline" type="button" disabled title="추후 지원 예정">
+          Google로 계속하기 (준비 중)
         </Button>
-        <Button variant="outline" type="button">
-          카카오로 계속하기
+        <Button variant="outline" type="button" disabled title="추후 지원 예정">
+          카카오로 계속하기 (준비 중)
         </Button>
       </div>
 
