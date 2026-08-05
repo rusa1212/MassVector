@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useWatchlist } from "@/context/WatchlistContext";
-import { stocks } from "@/data/stocks";
+import { getStocksByIds } from "@/data/stocks";
 import { StockCard } from "./StockCard";
 
 export function WatchlistSummary() {
@@ -21,7 +21,7 @@ export function WatchlistSummary() {
     );
   }
 
-  const watchedStocks = stocks.filter((stock) => stockIds.includes(stock.id));
+  const watchedStocks = getStocksByIds(stockIds);
 
   if (watchedStocks.length === 0) {
     return (

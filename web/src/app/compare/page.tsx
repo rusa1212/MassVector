@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { ChangeText } from "@/components/StockCard";
 import { PlaceholderChart } from "@/components/PlaceholderChart";
-import { stocks } from "@/data/stocks";
+import { getAllStocks, getStocksByIds } from "@/data/stocks";
 
 const MAX_SELECT = 3;
 
 export default function ComparePage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const stocks = getAllStocks();
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -18,7 +19,7 @@ export default function ComparePage() {
     });
   };
 
-  const selectedStocks = stocks.filter((stock) => selectedIds.includes(stock.id));
+  const selectedStocks = getStocksByIds(selectedIds);
 
   return (
     <div className="flex flex-col gap-6">

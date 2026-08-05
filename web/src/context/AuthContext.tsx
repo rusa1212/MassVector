@@ -12,6 +12,7 @@ interface AuthContextValue {
   isLoggedIn: boolean;
   login: (email: string) => void;
   signup: (name: string, email: string) => void;
+  updateProfile: (name: string, email: string) => void;
   logout: () => void;
 }
 
@@ -70,11 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     writeUser({ name, email });
   };
 
+  const updateProfile = (name: string, email: string) => {
+    writeUser({ name, email });
+  };
+
   const logout = () => writeUser(null);
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoggedIn: !!user, login, signup, logout }}
+      value={{ user, isLoggedIn: !!user, login, signup, updateProfile, logout }}
     >
       {children}
     </AuthContext.Provider>

@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/context/AuthContext";
 import { useWatchlist } from "@/context/WatchlistContext";
-import { stocks } from "@/data/stocks";
+import { getStocksByIds } from "@/data/stocks";
 
 export default function WatchlistPage() {
   const { isLoggedIn } = useAuth();
-  const { stockIds, toggleWatch } = useWatchlist();
+  const { stockIds, toggleWatch, getAlertSettings, setAlertSetting } = useWatchlist();
   const [alertTargetId, setAlertTargetId] = useState<string | null>(null);
 
   if (!isLoggedIn) {
@@ -25,8 +25,9 @@ export default function WatchlistPage() {
     );
   }
 
-  const watchedStocks = stocks.filter((stock) => stockIds.includes(stock.id));
-  const alertTarget = stocks.find((stock) => stock.id === alertTargetId);
+  const watchedStocks = getStocksByIds(stockIds);
+  const alertTarget = watchedStocks.find((stock) => stock.id === alertTargetId);
+  const alertSettings = alertTargetId ? getAlertSettings(alertTargetId) : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -100,16 +101,29 @@ export default function WatchlistPage() {
       >
         <div className="flex flex-col gap-3 text-sm text-slate-600">
           <label className="flex items-center gap-2">
-            <input type="checkbox" className="h-4 w-4" />
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={alertSettings?.priceAlert ?? false}
+              onChange={(e) =>
+                alertTargetId &&
+                setAlertSetting(alertTargetId, "priceAlert", e.target.checked)
+              }
+            />
             목표가 도달 시 알림
           </label>
           <label className="flex items-center gap-2">
-            <input type="checkbox" className="h-4 w-4" />
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={alertSettings?.volatilityAlert ?? false}
+              onChange={(e) =>
+                alertTargetId &&
+                setAlertSetting(alertTargetId, "volatilityAlert", e.target.checked)
+              }
+            />
             급등락(±5%) 알림
           </label>
-          <p className="text-xs text-slate-400">
-            알림 저장 기능은 추후 백엔드 연동 예정입니다.
-          </p>
           <Button size="sm" onClick={() => setAlertTargetId(null)}>
             닫기
           </Button>

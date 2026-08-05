@@ -12,11 +12,26 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+
+    const nextEmailError = EMAIL_PATTERN.test(email)
+      ? ""
+      : "올바른 이메일 형식이 아니에요.";
+    const nextPasswordError =
+      password.length >= 8 ? "" : "비밀번호는 8자 이상이어야 해요.";
+
+    setEmailError(nextEmailError);
+    setPasswordError(nextPasswordError);
+    if (nextEmailError || nextPasswordError) return;
+
     // 로그인 기능은 추후 백엔드 연동 예정 — 현재는 화면 흐름 확인용 임시 처리
-    login(email || "guest@example.com");
+    login(email);
     router.push("/");
   };
 
@@ -35,6 +50,7 @@ export default function LoginPage() {
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          error={emailError}
           required
         />
         <Input
@@ -44,6 +60,7 @@ export default function LoginPage() {
           placeholder="********"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={passwordError}
           required
         />
         <Button type="submit">로그인</Button>
@@ -56,11 +73,11 @@ export default function LoginPage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Button variant="outline" type="button">
-          Google로 계속하기
+        <Button variant="outline" type="button" disabled title="추후 지원 예정">
+          Google로 계속하기 (준비 중)
         </Button>
-        <Button variant="outline" type="button">
-          카카오로 계속하기
+        <Button variant="outline" type="button" disabled title="추후 지원 예정">
+          카카오로 계속하기 (준비 중)
         </Button>
       </div>
 

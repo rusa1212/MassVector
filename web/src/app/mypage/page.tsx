@@ -15,10 +15,11 @@ const notificationOptions = [
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, updateProfile, logout } = useAuth();
   const [draft, setDraft] = useState<{ name: string; email: string } | null>(
     null
   );
+  const [saved, setSaved] = useState(false);
   const name = draft?.name ?? user?.name ?? "";
   const email = draft?.email ?? user?.email ?? "";
   const [notifications, setNotifications] = useState<Record<string, boolean>>({
@@ -52,17 +53,33 @@ export default function MyPage() {
           id="name"
           label="이름"
           value={name}
-          onChange={(e) => setDraft({ name: e.target.value, email })}
+          onChange={(e) => {
+            setDraft({ name: e.target.value, email });
+            setSaved(false);
+          }}
         />
         <Input
           id="email"
           label="이메일"
           value={email}
-          onChange={(e) => setDraft({ name, email: e.target.value })}
+          onChange={(e) => {
+            setDraft({ name, email: e.target.value });
+            setSaved(false);
+          }}
         />
-        <Button size="sm" className="w-fit">
-          저장
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            className="w-fit"
+            onClick={() => {
+              updateProfile(name, email);
+              setSaved(true);
+            }}
+          >
+            저장
+          </Button>
+          {saved && <span className="text-xs text-slate-500">저장됐어요.</span>}
+        </div>
       </section>
 
       <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5">

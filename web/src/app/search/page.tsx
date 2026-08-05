@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/SearchBar";
 import { StockCard } from "@/components/StockCard";
-import { stocks } from "@/data/stocks";
+import { searchStocks } from "@/data/stocks";
 import type { Market } from "@/lib/types";
 
 const marketTabs: Array<{ key: Market | "전체"; label: string }> = [
@@ -26,14 +26,7 @@ export default async function SearchPage({
 }) {
   const { q = "", market = "전체" } = await searchParams;
 
-  const results = stocks.filter((stock) => {
-    const matchesQuery =
-      q.trim() === "" ||
-      stock.name.toLowerCase().includes(q.trim().toLowerCase()) ||
-      stock.ticker.toLowerCase().includes(q.trim().toLowerCase());
-    const matchesMarket = market === "전체" || stock.market === market;
-    return matchesQuery && matchesMarket;
-  });
+  const results = searchStocks(q, market as Market | "전체");
 
   return (
     <div className="flex flex-col gap-6">
