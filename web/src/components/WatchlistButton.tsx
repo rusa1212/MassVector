@@ -13,7 +13,7 @@ export function WatchlistButton({ stockId }: { stockId: string }) {
     return (
       <Link
         href="/login"
-        className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        className="inline-flex items-center justify-center gap-2 rounded-full border border-hairline px-3.5 py-1.5 text-sm font-medium text-fg-muted hover:bg-white/5"
       >
         로그인 후 관심 종목 등록
       </Link>

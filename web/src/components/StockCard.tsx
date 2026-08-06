@@ -14,15 +14,11 @@ export function ChangeText({
 }) {
   const isUp = changeAmount > 0;
   const isDown = changeAmount < 0;
-  const color = isUp
-    ? "text-red-600"
-    : isDown
-      ? "text-blue-600"
-      : "text-slate-500";
+  const color = isUp ? "text-up" : isDown ? "text-down" : "text-fg-subtle";
   const sign = isUp ? "+" : "";
 
   return (
-    <span className={`text-sm font-medium ${color}`}>
+    <span className={`text-sm font-medium tabular-nums ${color}`}>
       {sign}
       {changeAmount.toLocaleString("ko-KR")} ({sign}
       {changePercent.toFixed(2)}%)
@@ -34,17 +30,17 @@ export function StockCard({ stock }: { stock: Stock }) {
   return (
     <Link
       href={`/stock/${stock.id}`}
-      className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md"
+      className="glass-card flex flex-col gap-2 rounded-2xl p-4 transition-colors hover:bg-white/[0.08]"
     >
       <div className="flex items-center justify-between">
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+        <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-fg-muted">
           {stock.market}
         </span>
-        <span className="text-xs text-slate-400">{stock.ticker}</span>
+        <span className="text-xs text-fg-subtle">{stock.ticker}</span>
       </div>
-      <div className="font-semibold text-slate-900">{stock.name}</div>
+      <div className="font-medium text-fg">{stock.name}</div>
       <div className="flex items-baseline justify-between">
-        <span className="text-lg font-semibold text-slate-900">
+        <span className="text-lg font-medium tabular-nums text-fg">
           {formatPrice(stock.price)}
         </span>
         <ChangeText

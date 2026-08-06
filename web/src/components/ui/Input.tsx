@@ -9,16 +9,16 @@ export function Input({ label, error, id, className = "", ...props }: InputProps
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="text-sm font-medium text-fg-muted">
           {label}
         </label>
       )}
       <input
         id={id}
-        className={`rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 ${className}`}
+        className={`rounded-xl border border-hairline bg-white/5 px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-subtle focus:border-forecast focus:ring-1 focus:ring-forecast ${className}`}
         {...props}
       />
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-down">{error}</p>}
     </div>
   );
 }

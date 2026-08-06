@@ -31,11 +31,11 @@ export default async function SearchPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">종목 검색</h1>
+        <h1 className="text-xl font-medium text-fg">종목 검색</h1>
         <SearchBar defaultValue={q} className="max-w-md" />
       </div>
 
-      <div className="flex gap-1 border-b border-slate-200">
+      <div className="flex gap-1 border-b border-hairline">
         {marketTabs.map((tab) => {
           const isActive = tab.key === market;
           return (
@@ -44,8 +44,8 @@ export default async function SearchPage({
               href={buildHref(q, tab.key)}
               className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  ? "border-fg text-fg"
+                  : "border-transparent text-fg-subtle hover:text-fg-muted"
               }`}
             >
               {tab.label}
@@ -55,7 +55,7 @@ export default async function SearchPage({
       </div>
 
       {results.length === 0 ? (
-        <p className="py-10 text-center text-sm text-slate-500">
+        <p className="py-10 text-center text-sm text-fg-subtle">
           검색 결과가 없습니다.
         </p>
       ) : (

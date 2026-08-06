@@ -37,16 +37,16 @@ export function StockDetailTabs({
 
       {activeKey === "history" && (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="mb-2 flex gap-4 text-xs text-slate-500">
+          <div className="glass-card rounded-[20px] p-4">
+            <div className="mb-2 flex gap-4 text-xs text-fg-subtle">
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-slate-900" /> 종가
+                <span className="h-0.5 w-3 bg-fg" /> 종가
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-blue-600" /> 5일 이평선
+                <span className="h-0.5 w-3 bg-fg-muted" /> 5일 이평선
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-amber-500" /> 20일 이평선
+                <span className="h-0.5 w-3 bg-fg-subtle" /> 20일 이평선
               </span>
             </div>
             <StockChart bars={bars} ma5={analysis.ma5} ma20={analysis.ma20} />
@@ -57,25 +57,25 @@ export function StockDetailTabs({
 
       {activeKey === "prediction" && (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="mb-2 flex gap-4 text-xs text-slate-500">
+          <div className="glass-card rounded-[20px] p-4">
+            <div className="mb-2 flex gap-4 text-xs text-fg-subtle">
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-slate-900" /> 실제 종가
+                <span className="h-0.5 w-3 bg-fg" /> 실제 종가
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 border-t-2 border-dashed border-violet-600" /> 예측
+                <span className="h-0.5 w-3 border-t-2 border-dashed border-forecast" /> 예측
                 가격
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2.5 w-3 bg-violet-200" /> 예측 범위
+                <span className="h-2.5 w-3 bg-forecast/20" /> 예측 범위
               </span>
             </div>
             <StockChart bars={bars} visibleBars={40} forecast={analysis.forecast} />
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+          <div className="glass-card rounded-2xl p-4 text-sm text-fg-muted">
             {forecastInsight}
           </div>
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-400">
+          <div className="rounded-2xl border border-dashed border-hairline p-4 text-sm text-fg-subtle">
             예측 근거 뉴스 매칭 — API/모델 연동 예정
           </div>
         </div>
@@ -84,7 +84,7 @@ export function StockDetailTabs({
       {activeKey === "news" && (
         <div className="flex flex-col gap-3">
           {relatedNews.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-500">
+            <p className="py-6 text-center text-sm text-fg-subtle">
               관련 뉴스가 없습니다.
             </p>
           ) : (

@@ -8,6 +8,17 @@ const VIEW_WIDTH = 800;
 const VIEW_HEIGHT = 320;
 const PADDING = { top: 16, right: 16, bottom: 28, left: 56 };
 
+const COLORS = {
+  grid: "oklch(1 0 0 / 0.07)",
+  axisLabel: "oklch(0.58 0.01 275)",
+  close: "oklch(0.97 0.005 275)",
+  ma5: "oklch(0.85 0 275 / 0.8)",
+  ma20: "oklch(0.58 0.01 275)",
+  forecast: "oklch(0.7 0.13 285)",
+  forecastBand: "oklch(0.7 0.13 285 / 0.18)",
+  crosshair: "oklch(0.58 0.01 275 / 0.5)",
+};
+
 interface ChartPoint {
   date: string;
   close: number | null;
@@ -182,7 +193,7 @@ export function StockChart({
               x2={VIEW_WIDTH - PADDING.right}
               y1={yAt(value)}
               y2={yAt(value)}
-              stroke="#e2e8f0"
+              stroke={COLORS.grid}
               strokeWidth={1}
             />
             <text
@@ -191,7 +202,7 @@ export function StockChart({
               textAnchor="end"
               dominantBaseline="middle"
               fontSize={10}
-              fill="#94a3b8"
+              fill={COLORS.axisLabel}
             >
               {formatPrice(Math.round(value))}
             </text>
@@ -205,28 +216,28 @@ export function StockChart({
             y={VIEW_HEIGHT - PADDING.bottom + 16}
             textAnchor="middle"
             fontSize={10}
-            fill="#94a3b8"
+            fill={COLORS.axisLabel}
           >
             {points[idx]?.date.slice(5)}
           </text>
         ))}
 
-        {bandPath && <path d={bandPath} fill="#c4b5fd" fillOpacity={0.25} />}
+        {bandPath && <path d={bandPath} fill={COLORS.forecastBand} />}
 
         {ma20Path && (
-          <path d={ma20Path} fill="none" stroke="#f59e0b" strokeWidth={1.5} />
+          <path d={ma20Path} fill="none" stroke={COLORS.ma20} strokeWidth={1.5} />
         )}
         {ma5Path && (
-          <path d={ma5Path} fill="none" stroke="#2563eb" strokeWidth={1.5} />
+          <path d={ma5Path} fill="none" stroke={COLORS.ma5} strokeWidth={1.5} />
         )}
         {closePath && (
-          <path d={closePath} fill="none" stroke="#0f172a" strokeWidth={2} />
+          <path d={closePath} fill="none" stroke={COLORS.close} strokeWidth={2} />
         )}
         {forecastPath && (
           <path
             d={forecastPath}
             fill="none"
-            stroke="#7c3aed"
+            stroke={COLORS.forecast}
             strokeWidth={2}
             strokeDasharray="5 4"
           />
@@ -238,35 +249,35 @@ export function StockChart({
             x2={hoverX}
             y1={PADDING.top}
             y2={VIEW_HEIGHT - PADDING.bottom}
-            stroke="#94a3b8"
+            stroke={COLORS.crosshair}
             strokeWidth={1}
             strokeDasharray="3 3"
           />
         )}
         {hovered && hovered.close !== null && hoverX !== null && (
-          <circle cx={hoverX} cy={yAt(hovered.close)} r={3.5} fill="#0f172a" />
+          <circle cx={hoverX} cy={yAt(hovered.close)} r={3.5} fill={COLORS.close} />
         )}
         {hovered && hovered.forecast !== null && hoverX !== null && (
-          <circle cx={hoverX} cy={yAt(hovered.forecast)} r={3.5} fill="#7c3aed" />
+          <circle cx={hoverX} cy={yAt(hovered.forecast)} r={3.5} fill={COLORS.forecast} />
         )}
       </svg>
 
       {hovered && (
         <div
-          className="pointer-events-none absolute top-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm"
+          className="glass-card pointer-events-none absolute top-2 rounded-lg px-3 py-2 text-xs"
           style={{
             left: `${Math.min(Math.max((hoverX! / VIEW_WIDTH) * 100, 8), 78)}%`,
           }}
         >
-          <div className="font-medium text-slate-700">{hovered.date}</div>
+          <div className="font-medium text-fg-muted">{hovered.date}</div>
           {hovered.close !== null && (
-            <div className="text-slate-900">종가 {formatPrice(hovered.close)}</div>
+            <div className="tabular-nums text-fg">종가 {formatPrice(hovered.close)}</div>
           )}
           {hovered.isForecast && hovered.forecast !== null && (
-            <div className="text-violet-600">
+            <div className="tabular-nums text-forecast">
               예측 {formatPrice(hovered.forecast)}
               {hovered.forecastUpper !== null && hovered.forecastLower !== null && (
-                <span className="text-slate-400">
+                <span className="text-fg-subtle">
                   {" "}
                   ({formatPrice(hovered.forecastLower)} ~ {formatPrice(hovered.forecastUpper)})
                 </span>

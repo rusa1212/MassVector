@@ -12,9 +12,9 @@ export function WatchlistSummary() {
 
   if (!isLoggedIn) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-hairline p-6 text-center text-sm text-fg-subtle">
         로그인하면 관심 종목 요약을 볼 수 있어요.{" "}
-        <Link href="/login" className="font-medium text-slate-900 underline">
+        <Link href="/login" className="font-medium text-fg underline">
           로그인하기
         </Link>
       </div>
@@ -25,9 +25,9 @@ export function WatchlistSummary() {
 
   if (watchedStocks.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-hairline p-6 text-center text-sm text-fg-subtle">
         아직 등록한 관심 종목이 없어요.{" "}
-        <Link href="/search" className="font-medium text-slate-900 underline">
+        <Link href="/search" className="font-medium text-fg underline">
           종목 검색하러 가기
         </Link>
       </div>
