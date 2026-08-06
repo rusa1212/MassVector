@@ -38,8 +38,8 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6 py-10">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">로그인</h1>
-        <p className="text-sm text-slate-500">MassVector에 오신 것을 환영해요.</p>
+        <h1 className="text-xl font-medium text-fg">로그인</h1>
+        <p className="text-sm text-fg-subtle">MassVector에 오신 것을 환영해요.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -66,10 +66,10 @@ export default function LoginPage() {
         <Button type="submit">로그인</Button>
       </form>
 
-      <div className="flex items-center gap-3 text-xs text-slate-400">
-        <div className="h-px flex-1 bg-slate-200" />
+      <div className="flex items-center gap-3 text-xs text-fg-subtle">
+        <div className="h-px flex-1 bg-hairline" />
         또는
-        <div className="h-px flex-1 bg-slate-200" />
+        <div className="h-px flex-1 bg-hairline" />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -81,9 +81,9 @@ export default function LoginPage() {
         </Button>
       </div>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-fg-subtle">
         아직 계정이 없으신가요?{" "}
-        <Link href="/signup" className="font-medium text-slate-900 underline">
+        <Link href="/signup" className="font-medium text-fg underline">
           회원가입
         </Link>
       </p>

@@ -5,13 +5,13 @@ function Badge({
   tone,
 }: {
   label: string;
-  tone: "up" | "down" | "neutral" | "highlight";
+  tone: "positive" | "negative" | "neutral" | "accent";
 }) {
   const toneClass = {
-    up: "bg-red-50 text-red-600",
-    down: "bg-blue-50 text-blue-600",
-    neutral: "bg-slate-100 text-slate-500",
-    highlight: "bg-violet-50 text-violet-600",
+    positive: "bg-up/10 text-up",
+    negative: "bg-down/10 text-down",
+    neutral: "bg-white/10 text-fg-muted",
+    accent: "bg-forecast/10 text-forecast",
   }[tone];
 
   return (
@@ -23,16 +23,16 @@ function Badge({
 
 export function AnalysisPanel({ analysis }: { analysis: StockAnalysis }) {
   const trendTone =
-    analysis.trend === "상승" ? "up" : analysis.trend === "하락" ? "down" : "neutral";
+    analysis.trend === "상승" ? "positive" : analysis.trend === "하락" ? "negative" : "neutral";
   const rsiTone =
     analysis.rsiStatus === "과매수"
-      ? "up"
+      ? "negative"
       : analysis.rsiStatus === "과매도"
-        ? "down"
+        ? "positive"
         : "neutral";
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4">
+    <div className="glass-card flex flex-col gap-3 rounded-2xl p-4">
       <div className="flex flex-wrap gap-2">
         <Badge label={`추세 ${analysis.trend}`} tone={trendTone} />
         {analysis.rsi !== null && (
@@ -41,16 +41,16 @@ export function AnalysisPanel({ analysis }: { analysis: StockAnalysis }) {
         {analysis.maCross !== "없음" && (
           <Badge
             label={analysis.maCross}
-            tone={analysis.maCross === "골든크로스" ? "up" : "down"}
+            tone={analysis.maCross === "골든크로스" ? "positive" : "negative"}
           />
         )}
-        <Badge label={`변동성 ${analysis.volatilityPercent.toFixed(1)}%`} tone="highlight" />
+        <Badge label={`변동성 ${analysis.volatilityPercent.toFixed(1)}%`} tone="accent" />
       </div>
 
-      <ul className="flex flex-col gap-1.5 text-sm text-slate-600">
+      <ul className="flex flex-col gap-1.5 text-sm text-fg-muted">
         {analysis.insights.map((insight, i) => (
           <li key={i} className="flex gap-2">
-            <span className="text-slate-300">·</span>
+            <span className="text-fg-subtle">·</span>
             <span>{insight}</span>
           </li>
         ))}

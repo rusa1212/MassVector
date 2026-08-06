@@ -30,9 +30,9 @@ export default function MyPage() {
 
   if (!isLoggedIn) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-500">
+      <div className="rounded-2xl border border-dashed border-hairline p-10 text-center text-sm text-fg-subtle">
         마이페이지는 로그인 후 이용할 수 있어요.{" "}
-        <Link href="/login" className="font-medium text-slate-900 underline">
+        <Link href="/login" className="font-medium text-fg underline">
           로그인하기
         </Link>
       </div>
@@ -45,10 +45,10 @@ export default function MyPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-8 py-6">
-      <h1 className="text-xl font-semibold text-slate-900">마이페이지</h1>
+      <h1 className="text-xl font-medium text-fg">마이페이지</h1>
 
-      <section className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-slate-900">회원 정보</h2>
+      <section className="glass-card flex flex-col gap-4 rounded-2xl p-5">
+        <h2 className="text-sm font-medium text-fg">회원 정보</h2>
         <Input
           id="name"
           label="이름"
@@ -78,18 +78,18 @@ export default function MyPage() {
           >
             저장
           </Button>
-          {saved && <span className="text-xs text-slate-500">저장됐어요.</span>}
+          {saved && <span className="text-xs text-fg-subtle">저장됐어요.</span>}
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-slate-900">알림 설정</h2>
+      <section className="glass-card flex flex-col gap-3 rounded-2xl p-5">
+        <h2 className="text-sm font-medium text-fg">알림 설정</h2>
         {notificationOptions.map((option) => (
-          <label key={option.key} className="flex items-center justify-between text-sm text-slate-600">
+          <label key={option.key} className="flex items-center justify-between text-sm text-fg-muted">
             {option.label}
             <input
               type="checkbox"
-              className="h-4 w-4"
+              className="h-4 w-4 accent-[oklch(0.7_0.13_285)]"
               checked={notifications[option.key]}
               onChange={() => toggleNotification(option.key)}
             />
@@ -97,11 +97,11 @@ export default function MyPage() {
         ))}
       </section>
 
-      <section className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-slate-900">관심 종목</h2>
+      <section className="glass-card flex flex-col gap-3 rounded-2xl p-5">
+        <h2 className="text-sm font-medium text-fg">관심 종목</h2>
         <Link
           href="/watchlist"
-          className="w-fit rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200"
+          className="w-fit rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-medium text-fg hover:bg-white/15"
         >
           관심 종목 바로가기
         </Link>

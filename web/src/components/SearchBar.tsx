@@ -12,11 +12,11 @@ export function SearchBar({
         name="q"
         defaultValue={defaultValue}
         placeholder="종목명 또는 티커 검색"
-        className="w-full rounded-l-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+        className="min-w-0 flex-1 rounded-l-full border border-hairline bg-white/5 px-4 py-2 text-sm text-fg outline-none placeholder:text-fg-subtle focus:border-forecast focus:ring-1 focus:ring-forecast"
       />
       <button
         type="submit"
-        className="rounded-r-lg border border-l-0 border-slate-300 bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-700"
+        className="shrink-0 rounded-r-full border border-l-0 border-hairline bg-fg px-4 text-sm font-medium whitespace-nowrap text-bg transition-opacity hover:opacity-85"
       >
         검색
       </button>

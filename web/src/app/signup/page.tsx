@@ -49,8 +49,8 @@ export default function SignupPage() {
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6 py-10">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">회원가입</h1>
-        <p className="text-sm text-slate-500">몇 가지 정보만 입력하면 바로 시작할 수 있어요.</p>
+        <h1 className="text-xl font-medium text-fg">회원가입</h1>
+        <p className="text-sm text-fg-subtle">몇 가지 정보만 입력하면 바로 시작할 수 있어요.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -96,10 +96,10 @@ export default function SignupPage() {
         <Button type="submit">회원가입</Button>
       </form>
 
-      <div className="flex items-center gap-3 text-xs text-slate-400">
-        <div className="h-px flex-1 bg-slate-200" />
+      <div className="flex items-center gap-3 text-xs text-fg-subtle">
+        <div className="h-px flex-1 bg-hairline" />
         또는
-        <div className="h-px flex-1 bg-slate-200" />
+        <div className="h-px flex-1 bg-hairline" />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -111,9 +111,9 @@ export default function SignupPage() {
         </Button>
       </div>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-fg-subtle">
         이미 계정이 있으신가요?{" "}
-        <Link href="/login" className="font-medium text-slate-900 underline">
+        <Link href="/login" className="font-medium text-fg underline">
           로그인
         </Link>
       </p>

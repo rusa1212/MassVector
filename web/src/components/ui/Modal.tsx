@@ -17,14 +17,14 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       <button
         aria-label="닫기"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-bg/70 backdrop-blur-sm"
       />
-      <div className="relative w-full max-w-sm rounded-xl bg-white p-5 shadow-lg">
+      <div className="glass-card relative w-full max-w-sm rounded-2xl p-5">
         <div className="mb-4 flex items-center justify-between">
-          {title && <h3 className="text-base font-semibold text-slate-900">{title}</h3>}
+          {title && <h3 className="text-base font-medium text-fg">{title}</h3>}
           <button
             onClick={onClose}
-            className="ml-auto text-slate-400 hover:text-slate-600"
+            className="ml-auto text-fg-subtle hover:text-fg"
             aria-label="닫기"
           >
             ✕

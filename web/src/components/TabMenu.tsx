@@ -15,7 +15,7 @@ export function TabMenu({
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="flex gap-1 border-b border-slate-200">
+    <div className="flex gap-1 border-b border-hairline">
       {tabs.map((tab) => {
         const isActive = tab.key === activeKey;
         return (
@@ -24,8 +24,8 @@ export function TabMenu({
             onClick={() => onChange(tab.key)}
             className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               isActive
-                ? "border-slate-900 text-slate-900"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-fg text-fg"
+                : "border-transparent text-fg-subtle hover:text-fg-muted"
             }`}
           >
             {tab.label}
