@@ -43,7 +43,7 @@ export default async function StockDetailPage({
         <WatchlistButton stockId={stock.id} />
       </div>
 
-      <StockDetailTabs stockName={stock.name} relatedNews={relatedNews} />
+      <StockDetailTabs stock={stock} relatedNews={relatedNews} />
     </div>
   );
 }
