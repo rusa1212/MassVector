@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/context/AuthContext";
 import { useWatchlist } from "@/context/WatchlistContext";
 import { getStocksByIds } from "@/data/stocks";
+import { useStockPrices } from "@/hooks/useStockPrices";
 
 export default function WatchlistPage() {
   const { isLoggedIn } = useAuth();
@@ -65,13 +66,7 @@ export default function WatchlistPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-fg-subtle">{stock.market}</td>
-                  <td className="px-4 py-3 tabular-nums text-fg">{stock.price.toLocaleString("ko-KR")}</td>
-                  <td className="px-4 py-3">
-                    <ChangeText
-                      changeAmount={stock.changeAmount}
-                      changePercent={stock.changePercent}
-                    />
-                  </td>
+                  <WatchlistPriceCells stockId={stock.id} />
                   <td className="px-4 py-3">
                     <Button
                       variant="outline"
@@ -133,5 +128,41 @@ export default function WatchlistPage() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+function WatchlistPriceCells({ stockId }: { stockId: string }) {
+  const prices = useStockPrices(stockId);
+
+  if (prices.status === "loading") {
+    return (
+      <>
+        <td className="px-4 py-3 text-fg-subtle">불러오는 중</td>
+        <td className="px-4 py-3 text-fg-subtle">—</td>
+      </>
+    );
+  }
+
+  if (prices.status === "error") {
+    return (
+      <>
+        <td className="px-4 py-3 text-down">조회 실패</td>
+        <td className="px-4 py-3 text-down">—</td>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <td className="px-4 py-3 tabular-nums text-fg">
+        {prices.data.quote.price.toLocaleString("ko-KR")}
+      </td>
+      <td className="px-4 py-3">
+        <ChangeText
+          changeAmount={prices.data.quote.changeAmount}
+          changePercent={prices.data.quote.changePercent}
+        />
+      </td>
+    </>
   );
 }

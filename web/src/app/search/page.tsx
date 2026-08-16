@@ -8,7 +8,6 @@ const marketTabs: Array<{ key: Market | "전체"; label: string }> = [
   { key: "전체", label: "전체" },
   { key: "코스피", label: "코스피" },
   { key: "코스닥", label: "코스닥" },
-  { key: "미국", label: "미국" },
 ];
 
 function buildHref(q: string, market: string) {

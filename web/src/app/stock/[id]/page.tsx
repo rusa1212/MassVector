@@ -3,7 +3,7 @@ import { ChangeText } from "@/components/StockCard";
 import { StockDetailTabs } from "@/components/StockDetailTabs";
 import { WatchlistButton } from "@/components/WatchlistButton";
 import { getStockById } from "@/data/stocks";
-import { getNewsByStockId } from "@/data/news";
+import { getPublicStockPrices } from "@/lib/publicStockPrices";
 
 export default async function StockDetailPage({
   params,
@@ -11,13 +11,33 @@ export default async function StockDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const stock = getStockById(id);
+  const baseStock = getStockById(id);
 
-  if (!stock) {
+  if (!baseStock) {
     notFound();
   }
 
-  const relatedNews = getNewsByStockId(stock.id);
+  let publicPrices: Awaited<ReturnType<typeof getPublicStockPrices>>;
+  try {
+    publicPrices = await getPublicStockPrices(baseStock.ticker);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "시세 정보를 불러오지 못했습니다.";
+    return (
+      <div className="rounded-2xl border border-down/30 p-10 text-center">
+        <h1 className="text-lg font-medium text-fg">시세를 불러오지 못했습니다</h1>
+        <p className="mt-2 text-sm text-down">{message}</p>
+      </div>
+    );
+  }
+
+  const stock = {
+    ...baseStock,
+    price: publicPrices.quote.price,
+    changeAmount: publicPrices.quote.changeAmount,
+    changePercent: publicPrices.quote.changePercent,
+    asOf: publicPrices.quote.asOf,
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,7 +63,10 @@ export default async function StockDetailPage({
         <WatchlistButton stockId={stock.id} />
       </div>
 
-      <StockDetailTabs stock={stock} relatedNews={relatedNews} />
+      <StockDetailTabs
+        stock={stock}
+        bars={publicPrices.bars}
+      />
     </div>
   );
 }

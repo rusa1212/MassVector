@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { ChangeText } from "@/components/StockCard";
-import { PlaceholderChart } from "@/components/PlaceholderChart";
+import { StockChart } from "@/components/charts/StockChart";
 import { getAllStocks, getStocksByIds } from "@/data/stocks";
+import { useStockPrices } from "@/hooks/useStockPrices";
+import type { StockDefinition } from "@/lib/types";
 
 const MAX_SELECT = 3;
 
@@ -12,10 +14,10 @@ export default function ComparePage() {
   const stocks = getAllStocks();
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      if (prev.includes(id)) return prev.filter((s) => s !== id);
-      if (prev.length >= MAX_SELECT) return prev;
-      return [...prev, id];
+    setSelectedIds((previous) => {
+      if (previous.includes(id)) return previous.filter((value) => value !== id);
+      if (previous.length >= MAX_SELECT) return previous;
+      return [...previous, id];
     });
   };
 
@@ -26,7 +28,7 @@ export default function ComparePage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-medium text-fg">종목 비교</h1>
         <p className="text-sm text-fg-subtle">
-          비교할 종목을 최대 {MAX_SELECT}개까지 선택하세요. ({selectedIds.length}/{MAX_SELECT})
+          비교할 국내 종목을 최대 {MAX_SELECT}개까지 선택하세요. ({selectedIds.length}/{MAX_SELECT})
         </p>
       </div>
 
@@ -37,6 +39,7 @@ export default function ComparePage() {
           return (
             <button
               key={stock.id}
+              type="button"
               onClick={() => toggleSelect(stock.id)}
               disabled={isDisabled}
               className={`rounded-xl border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
@@ -47,7 +50,7 @@ export default function ComparePage() {
             >
               <div className="font-medium">{stock.name}</div>
               <div className={isSelected ? "text-bg/60" : "text-fg-subtle"}>
-                {stock.market}
+                {stock.market} · {stock.ticker}
               </div>
             </button>
           );
@@ -59,51 +62,54 @@ export default function ComparePage() {
           비교할 종목을 선택해주세요.
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          <div className="glass-card overflow-x-auto rounded-2xl">
-            <table className="w-full min-w-[480px] text-left text-sm">
-              <thead className="border-b border-hairline text-xs text-fg-subtle">
-                <tr>
-                  <th className="px-4 py-3 font-medium">항목</th>
-                  {selectedStocks.map((stock) => (
-                    <th key={stock.id} className="px-4 py-3 font-medium text-fg">
-                      {stock.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-hairline">
-                  <td className="px-4 py-3 text-fg-subtle">시장</td>
-                  {selectedStocks.map((stock) => (
-                    <td key={stock.id} className="px-4 py-3 text-fg">{stock.market}</td>
-                  ))}
-                </tr>
-                <tr className="border-b border-hairline">
-                  <td className="px-4 py-3 text-fg-subtle">현재가</td>
-                  {selectedStocks.map((stock) => (
-                    <td key={stock.id} className="px-4 py-3 tabular-nums text-fg">
-                      {stock.price.toLocaleString("ko-KR")}
-                    </td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 text-fg-subtle">등락률</td>
-                  {selectedStocks.map((stock) => (
-                    <td key={stock.id} className="px-4 py-3">
-                      <ChangeText
-                        changeAmount={stock.changeAmount}
-                        changePercent={stock.changePercent}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <PlaceholderChart label="종목 비교 차트" />
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          {selectedStocks.map((stock) => (
+            <ComparisonCard key={stock.id} stock={stock} />
+          ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+function ComparisonCard({ stock }: { stock: StockDefinition }) {
+  const prices = useStockPrices(stock.id);
+
+  return (
+    <div className="glass-card flex min-h-80 flex-col gap-3 rounded-2xl p-4">
+      <div>
+        <div className="font-medium text-fg">{stock.name}</div>
+        <div className="text-xs text-fg-subtle">
+          {stock.market} · {stock.ticker}
+        </div>
+      </div>
+
+      {prices.status === "loading" && (
+        <div className="grid flex-1 place-items-center text-sm text-fg-subtle">
+          시세 불러오는 중
+        </div>
+      )}
+      {prices.status === "error" && (
+        <div className="grid flex-1 place-items-center text-center text-sm text-down">
+          {prices.message}
+        </div>
+      )}
+      {prices.status === "success" && (
+        <>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <span className="text-xl font-medium tabular-nums text-fg">
+              {prices.data.quote.price.toLocaleString("ko-KR")}
+            </span>
+            <ChangeText
+              changeAmount={prices.data.quote.changeAmount}
+              changePercent={prices.data.quote.changePercent}
+            />
+          </div>
+          <StockChart bars={prices.data.bars} visibleBars={40} height={220} />
+          <div className="text-right text-xs text-fg-subtle">
+            {prices.data.quote.asOf} 기준
+          </div>
+        </>
       )}
     </div>
   );

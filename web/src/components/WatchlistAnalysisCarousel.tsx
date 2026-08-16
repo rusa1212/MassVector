@@ -7,8 +7,9 @@ import { ChangeText } from "@/components/StockCard";
 import { useAuth } from "@/context/AuthContext";
 import { useWatchlist } from "@/context/WatchlistContext";
 import { getStockById } from "@/data/stocks";
-import { getPriceHistory } from "@/lib/priceHistory";
+import { useStockPrices } from "@/hooks/useStockPrices";
 import { buildStockAnalysis } from "@/lib/technicalAnalysis";
+import type { StockDefinition } from "@/lib/types";
 
 export function WatchlistAnalysisCarousel() {
   const { isLoggedIn } = useAuth();
@@ -44,8 +45,6 @@ export function WatchlistAnalysisCarousel() {
 
   const safeIndex = currentIndex % watchedStocks.length;
   const stock = watchedStocks[safeIndex];
-  const bars = getPriceHistory(stock);
-  const analysis = buildStockAnalysis(bars);
   const hasMultipleStocks = watchedStocks.length > 1;
 
   const move = (direction: -1 | 1) => {
@@ -53,6 +52,38 @@ export function WatchlistAnalysisCarousel() {
       (safeIndex + direction + watchedStocks.length) % watchedStocks.length,
     );
   };
+
+  return (
+    <AnalysisSlide
+      key={stock.id}
+      stock={stock}
+      current={safeIndex + 1}
+      total={watchedStocks.length}
+      hasMultipleStocks={hasMultipleStocks}
+      onPrevious={() => move(-1)}
+      onNext={() => move(1)}
+    />
+  );
+}
+
+function AnalysisSlide({
+  stock,
+  current,
+  total,
+  hasMultipleStocks,
+  onPrevious,
+  onNext,
+}: {
+  stock: StockDefinition;
+  current: number;
+  total: number;
+  hasMultipleStocks: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  const prices = useStockPrices(stock.id);
+  const analysis =
+    prices.status === "success" ? buildStockAnalysis(prices.data.bars) : null;
 
   return (
     <div className="glass-card flex flex-col gap-6 rounded-[20px] p-6 sm:p-8">
@@ -74,59 +105,105 @@ export function WatchlistAnalysisCarousel() {
 
         <div className="flex shrink-0 items-center justify-between gap-5 sm:justify-end">
           <div className="flex flex-col items-start gap-1 sm:items-end">
-            <span className="text-2xl font-medium tabular-nums text-fg">
-              {stock.price.toLocaleString("ko-KR")}
-            </span>
-            <ChangeText
-              changeAmount={stock.changeAmount}
-              changePercent={stock.changePercent}
-            />
+            {prices.status === "success" ? (
+              <>
+                <span className="text-2xl font-medium tabular-nums text-fg">
+                  {prices.data.quote.price.toLocaleString("ko-KR")}
+                </span>
+                <ChangeText
+                  changeAmount={prices.data.quote.changeAmount}
+                  changePercent={prices.data.quote.changePercent}
+                />
+              </>
+            ) : (
+              <span className="text-sm text-fg-subtle">
+                {prices.status === "loading" ? "시세 불러오는 중" : "시세 조회 실패"}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2" aria-label="관심 종목 페이지 이동">
-            <button
-              type="button"
-              onClick={() => move(-1)}
+            <NavigationButton
+              direction="left"
+              label="이전 관심 종목"
               disabled={!hasMultipleStocks}
-              aria-label="이전 관심 종목"
-              className="grid size-9 place-items-center rounded-full border border-hairline text-fg transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <ArrowIcon direction="left" />
-            </button>
+              onClick={onPrevious}
+            />
             <span
               className="min-w-10 text-center text-xs tabular-nums text-fg-subtle"
               aria-live="polite"
             >
-              {safeIndex + 1} / {watchedStocks.length}
+              {current} / {total}
             </span>
-            <button
-              type="button"
-              onClick={() => move(1)}
+            <NavigationButton
+              direction="right"
+              label="다음 관심 종목"
               disabled={!hasMultipleStocks}
-              aria-label="다음 관심 종목"
-              className="grid size-9 place-items-center rounded-full border border-hairline text-fg transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <ArrowIcon direction="right" />
-            </button>
+              onClick={onNext}
+            />
           </div>
         </div>
       </div>
 
-      <StockChart
-        key={stock.id}
-        bars={bars}
-        ma5={analysis.ma5}
-        ma20={analysis.ma20}
-        forecast={analysis.forecast}
-        visibleBars={60}
-        height={340}
-      />
+      {prices.status === "loading" && (
+        <div className="grid h-[340px] place-items-center rounded-2xl border border-hairline text-sm text-fg-subtle">
+          공공데이터포털에서 시세를 불러오는 중입니다.
+        </div>
+      )}
+      {prices.status === "error" && (
+        <div className="grid h-[340px] place-items-center rounded-2xl border border-down/30 text-sm text-down">
+          {prices.message}
+        </div>
+      )}
+      {prices.status === "success" && analysis && (
+        <StockChart
+          bars={prices.data.bars}
+          ma5={analysis.ma5}
+          ma20={analysis.ma20}
+          forecast={analysis.forecast}
+          visibleBars={60}
+          height={340}
+        />
+      )}
 
-      <p className="text-sm text-fg-subtle">
-        {analysis.insights[0]} 표시된 예측 구간은 목데이터 기반 추세 모델의
-        참고용 추정치이며 투자 조언이 아닙니다.
-      </p>
+      <div className="flex flex-col gap-1 text-sm text-fg-subtle sm:flex-row sm:items-center sm:justify-between">
+        {prices.status === "success" && analysis && (
+          <>
+            <p>
+              {analysis.insights[0]} 표시된 예측 구간은 추세 모델의 참고용
+              추정치이며 투자 조언이 아닙니다.
+            </p>
+            <span className="shrink-0 text-xs">
+              공공데이터포털 · {prices.data.quote.asOf} 기준
+            </span>
+          </>
+        )}
+      </div>
     </div>
+  );
+}
+
+function NavigationButton({
+  direction,
+  label,
+  disabled,
+  onClick,
+}: {
+  direction: "left" | "right";
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="grid size-9 place-items-center rounded-full border border-hairline text-fg transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-30"
+    >
+      <ArrowIcon direction={direction} />
+    </button>
   );
 }
 
@@ -162,12 +239,7 @@ function EmptyState({
 
 function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 20 20"
-      fill="none"
-      className="size-4"
-    >
+    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
       <path
         d={direction === "left" ? "m12.5 4.5-5 5.5 5 5.5" : "m7.5 4.5 5 5.5-5 5.5"}
         stroke="currentColor"
