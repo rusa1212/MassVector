@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { ChangeText } from "@/components/StockCard";
 import { WatchlistSummary } from "@/components/WatchlistSummary";
+import { WatchlistAnalysisCarousel } from "@/components/WatchlistAnalysisCarousel";
 import { AuroraLayer } from "@/components/AuroraLayer";
-import { StockChart } from "@/components/charts/StockChart";
-import { getPopularStocks, getAllStocks, getStockById } from "@/data/stocks";
-import { getPriceHistory } from "@/lib/priceHistory";
-import { buildStockAnalysis } from "@/lib/technicalAnalysis";
+import { getPopularStocks, getAllStocks } from "@/data/stocks";
 
 const stats = [
   { label: "커버 종목 수", value: `${getAllStocks().length}개` },
@@ -57,9 +55,6 @@ const steps = [
 
 export default function Home() {
   const popularStocks = getPopularStocks();
-  const demoStock = getStockById("005930")!;
-  const demoBars = getPriceHistory(demoStock);
-  const demoAnalysis = buildStockAnalysis(demoBars);
 
   return (
     <div className="flex flex-col gap-20 py-4 sm:gap-28">
@@ -122,41 +117,9 @@ export default function Home() {
         ))}
       </section>
 
-      {/* 핵심 차트 데모 */}
+      {/* 관심 종목 차트 */}
       <section id="chart-demo" className="scroll-mt-24">
-        <div className="glass-card flex flex-col gap-6 rounded-[20px] p-6 sm:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium tracking-[0.12em] text-fg-subtle uppercase">
-                분석 데모
-              </span>
-              <h2 className="text-2xl font-medium text-fg">
-                {demoStock.name} 과거 흐름 &amp; 예측
-              </h2>
-            </div>
-            <div className="flex flex-col items-start gap-1 sm:items-end">
-              <span className="text-2xl font-medium tabular-nums text-fg">
-                {demoStock.price.toLocaleString("ko-KR")}
-              </span>
-              <ChangeText
-                changeAmount={demoStock.changeAmount}
-                changePercent={demoStock.changePercent}
-              />
-            </div>
-          </div>
-          <StockChart
-            bars={demoBars}
-            ma5={demoAnalysis.ma5}
-            ma20={demoAnalysis.ma20}
-            forecast={demoAnalysis.forecast}
-            visibleBars={60}
-            height={340}
-          />
-          <p className="text-sm text-fg-subtle">
-            {demoAnalysis.insights[0]} 표시된 예측 구간은 목데이터 기반 추세
-            모델의 참고용 추정치이며 투자 조언이 아닙니다.
-          </p>
-        </div>
+        <WatchlistAnalysisCarousel />
       </section>
 
       {/* 기능 4카드 */}
