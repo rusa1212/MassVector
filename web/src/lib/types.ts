@@ -6,6 +6,7 @@ export interface StockDefinition {
   ticker: string;
   market: Market;
   popular?: boolean;
+  featured?: boolean;
 }
 
 export interface Stock extends StockDefinition {

@@ -26,6 +26,7 @@ export default async function SearchPage({
   const { q = "", market = "전체" } = await searchParams;
 
   const results = searchStocks(q, market as Market | "전체");
+  const isSearching = q.trim().length > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -51,6 +52,17 @@ export default async function SearchPage({
             </Link>
           );
         })}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <h2 className="text-base font-medium text-fg">
+          {isSearching ? `검색 결과 ${results.length}개` : "국내 대표 종목"}
+        </h2>
+        {!isSearching && (
+          <p className="text-sm text-fg-subtle">
+            대표 종목 10개를 먼저 보여드려요. 다른 종목은 이름이나 티커로 검색해보세요.
+          </p>
+        )}
       </div>
 
       {results.length === 0 ? (

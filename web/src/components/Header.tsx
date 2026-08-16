@@ -1,3 +1,4 @@
+// Header함수는 “사이트 전체에서 공통으로 쓰이는 상단 메뉴 + 검색 + 로그인 상태 UI”를 만드는 컴포넌트
 "use client";
 
 import Link from "next/link";
