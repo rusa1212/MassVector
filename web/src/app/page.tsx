@@ -1,17 +1,15 @@
 import Link from "next/link";
-import { ChangeText } from "@/components/StockCard";
+import { StockCard } from "@/components/StockCard";
 import { WatchlistSummary } from "@/components/WatchlistSummary";
+import { WatchlistAnalysisCarousel } from "@/components/WatchlistAnalysisCarousel";
 import { AuroraLayer } from "@/components/AuroraLayer";
-import { StockChart } from "@/components/charts/StockChart";
-import { getPopularStocks, getAllStocks, getStockById } from "@/data/stocks";
-import { getPriceHistory } from "@/lib/priceHistory";
-import { buildStockAnalysis } from "@/lib/technicalAnalysis";
+import { getPopularStocks, getAllStocks } from "@/data/stocks";
 
 const stats = [
   { label: "커버 종목 수", value: `${getAllStocks().length}개` },
   { label: "분석 지표", value: "이평·RSI·변동성 5종" },
-  { label: "데이터 상태", value: "정적 목데이터" },
-  { label: "데이터 소스", value: "API 연동 예정" },
+  { label: "데이터 상태", value: "일 단위 갱신" },
+  { label: "데이터 소스", value: "금융위원회 API" },
 ];
 
 const features = [
@@ -57,9 +55,6 @@ const steps = [
 
 export default function Home() {
   const popularStocks = getPopularStocks();
-  const demoStock = getStockById("005930")!;
-  const demoBars = getPriceHistory(demoStock);
-  const demoAnalysis = buildStockAnalysis(demoBars);
 
   return (
     <div className="flex flex-col gap-20 py-4 sm:gap-28">
@@ -85,8 +80,8 @@ export default function Home() {
             style={{ animationDelay: "160ms" }}
           >
             관심 있는 종목을 검색하고, 과거 흐름과 추세 기반 예측을 한 화면에서
-            확인해보세요. 지금은 화면 구조를 먼저 구성한 프로토타입 단계로,
-            실제 시세와 예측 데이터는 추후 API 연동을 통해 제공될 예정입니다.
+            확인해보세요. 국내 주식의 실제 시세 데이터와 추세 기반 분석을
+            한곳에서 제공합니다.
           </p>
           <div
             className="animate-fade-up flex flex-wrap gap-3"
@@ -122,41 +117,9 @@ export default function Home() {
         ))}
       </section>
 
-      {/* 핵심 차트 데모 */}
+      {/* 관심 종목 차트 */}
       <section id="chart-demo" className="scroll-mt-24">
-        <div className="glass-card flex flex-col gap-6 rounded-[20px] p-6 sm:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium tracking-[0.12em] text-fg-subtle uppercase">
-                분석 데모
-              </span>
-              <h2 className="text-2xl font-medium text-fg">
-                {demoStock.name} 과거 흐름 &amp; 예측
-              </h2>
-            </div>
-            <div className="flex flex-col items-start gap-1 sm:items-end">
-              <span className="text-2xl font-medium tabular-nums text-fg">
-                {demoStock.price.toLocaleString("ko-KR")}
-              </span>
-              <ChangeText
-                changeAmount={demoStock.changeAmount}
-                changePercent={demoStock.changePercent}
-              />
-            </div>
-          </div>
-          <StockChart
-            bars={demoBars}
-            ma5={demoAnalysis.ma5}
-            ma20={demoAnalysis.ma20}
-            forecast={demoAnalysis.forecast}
-            visibleBars={60}
-            height={340}
-          />
-          <p className="text-sm text-fg-subtle">
-            {demoAnalysis.insights[0]} 표시된 예측 구간은 목데이터 기반 추세
-            모델의 참고용 추정치이며 투자 조언이 아닙니다.
-          </p>
-        </div>
+        <WatchlistAnalysisCarousel />
       </section>
 
       {/* 기능 4카드 */}
@@ -202,45 +165,10 @@ export default function Home() {
             전체보기
           </Link>
         </div>
-        <div className="glass-card overflow-hidden rounded-2xl">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-hairline text-xs text-fg-subtle">
-              <tr>
-                <th className="px-4 py-3 font-medium">종목명</th>
-                <th className="px-4 py-3 font-medium">시장</th>
-                <th className="px-4 py-3 font-medium">현재가</th>
-                <th className="px-4 py-3 font-medium">등락률</th>
-              </tr>
-            </thead>
-            <tbody>
-              {popularStocks.map((stock) => (
-                <tr
-                  key={stock.id}
-                  className="border-b border-hairline transition-colors last:border-0 hover:bg-white/[0.03]"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/stock/${stock.id}`}
-                      className="font-medium text-fg hover:underline"
-                    >
-                      {stock.name}
-                    </Link>
-                    <span className="ml-2 text-xs text-fg-subtle">{stock.ticker}</span>
-                  </td>
-                  <td className="px-4 py-3 text-fg-subtle">{stock.market}</td>
-                  <td className="px-4 py-3 tabular-nums text-fg">
-                    {stock.price.toLocaleString("ko-KR")}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ChangeText
-                      changeAmount={stock.changeAmount}
-                      changePercent={stock.changePercent}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {popularStocks.map((stock) => (
+            <StockCard key={stock.id} stock={stock} />
+          ))}
         </div>
       </section>
 

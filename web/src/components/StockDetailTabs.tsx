@@ -4,36 +4,33 @@ import { useMemo, useState } from "react";
 import { TabMenu } from "./TabMenu";
 import { StockChart } from "./charts/StockChart";
 import { AnalysisPanel } from "./AnalysisPanel";
-import { NewsCard } from "./NewsCard";
-import { getPriceHistory } from "@/lib/priceHistory";
 import { buildStockAnalysis } from "@/lib/technicalAnalysis";
-import type { NewsItem, Stock } from "@/lib/types";
+import type { PriceBar } from "@/lib/priceHistory";
+import type { Stock } from "@/lib/types";
 
 const tabs = [
   { key: "history", label: "과거 주가 분석" },
   { key: "prediction", label: "예측" },
-  { key: "news", label: "뉴스" },
 ];
 
 export function StockDetailTabs({
   stock,
-  relatedNews,
+  bars,
 }: {
   stock: Stock;
-  relatedNews: NewsItem[];
+  bars: PriceBar[];
 }) {
   const [activeKey, setActiveKey] = useState("history");
-
-  const { bars, analysis } = useMemo(() => {
-    const priceBars = getPriceHistory(stock);
-    return { bars: priceBars, analysis: buildStockAnalysis(priceBars) };
-  }, [stock]);
-
+  const analysis = useMemo(() => buildStockAnalysis(bars), [bars]);
   const forecastInsight = analysis.insights[analysis.insights.length - 1];
 
   return (
     <div className="flex flex-col gap-4">
       <TabMenu tabs={tabs} activeKey={activeKey} onChange={setActiveKey} />
+
+      <div className="text-right text-xs text-fg-subtle">
+        공공데이터포털 · {stock.asOf} 기준
+      </div>
 
       {activeKey === "history" && (
         <div className="flex flex-col gap-4">
@@ -43,10 +40,10 @@ export function StockDetailTabs({
                 <span className="h-0.5 w-3 bg-fg" /> 종가
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-fg-muted" /> 5일 이평선
+                <span className="h-0.5 w-3 bg-fg-muted" /> 5일 이동평균
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-fg-subtle" /> 20일 이평선
+                <span className="h-0.5 w-3 bg-fg-subtle" /> 20일 이동평균
               </span>
             </div>
             <StockChart bars={bars} ma5={analysis.ma5} ma20={analysis.ma20} />
@@ -63,11 +60,10 @@ export function StockDetailTabs({
                 <span className="h-0.5 w-3 bg-fg" /> 실제 종가
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 border-t-2 border-dashed border-forecast" /> 예측
-                가격
+                <span className="h-0.5 w-3 border-t-2 border-dashed border-forecast" /> 예상 가격
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2.5 w-3 bg-forecast/20" /> 예측 범위
+                <span className="h-2.5 w-3 bg-forecast/20" /> 예상 범위
               </span>
             </div>
             <StockChart bars={bars} visibleBars={40} forecast={analysis.forecast} />
@@ -75,21 +71,6 @@ export function StockDetailTabs({
           <div className="glass-card rounded-2xl p-4 text-sm text-fg-muted">
             {forecastInsight}
           </div>
-          <div className="rounded-2xl border border-dashed border-hairline p-4 text-sm text-fg-subtle">
-            예측 근거 뉴스 매칭 — API/모델 연동 예정
-          </div>
-        </div>
-      )}
-
-      {activeKey === "news" && (
-        <div className="flex flex-col gap-3">
-          {relatedNews.length === 0 ? (
-            <p className="py-6 text-center text-sm text-fg-subtle">
-              관련 뉴스가 없습니다.
-            </p>
-          ) : (
-            relatedNews.map((item) => <NewsCard key={item.id} item={item} />)
-          )}
         </div>
       )}
     </div>
