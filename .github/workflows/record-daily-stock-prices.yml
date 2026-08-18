@@ -1,0 +1,46 @@
+name: Record daily stock prices
+
+on:
+  schedule:
+    # 14:10 KST, Monday-Friday. The provider publishes the previous
+    # business day's data after 13:00 KST.
+    - cron: "10 5 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: record-daily-stock-prices
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch and merge closing prices
+        working-directory: web
+        env:
+          PUBLIC_DATA_SERVICE_KEY: ${{ secrets.PUBLIC_DATA_SERVICE_KEY }}
+        run: node scripts/update-stock-prices.mjs
+
+      - name: Commit updated price history
+        run: |
+          if git diff --quiet -- web/src/data/stock-prices.json; then
+            echo "No new closing prices."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/src/data/stock-prices.json
+          git commit -m "chore: record daily stock prices"
+          git push

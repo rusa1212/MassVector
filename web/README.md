@@ -31,6 +31,21 @@ PUBLIC_DATA_SERVICE_KEY=공공데이터포털_인증키
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## 일별 종가 기록
+
+`.github/workflows/record-daily-stock-prices.yml`이 월요일부터 금요일까지
+한국시간 오후 2시 10분에 실행되어 전 영업일 종가를
+`src/data/stock-prices.json`에 누적합니다. 최근 30일을 매번 다시 조회하므로
+휴장일이나 일시적인 실행 실패로 생긴 누락도 다음 실행에서 보완합니다.
+
+GitHub 저장소의 Actions secret에 `PUBLIC_DATA_SERVICE_KEY`를 등록해야 합니다.
+첫 실행은 Actions 화면에서 수동으로 실행할 수 있으며 약 1년치를 백필합니다.
+로컬에서는 다음 명령으로 같은 작업을 실행할 수 있습니다.
+
+```bash
+npm run prices:update
+```
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
