@@ -1,13 +1,14 @@
-import { readFile, rename, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createClient } from "@supabase/supabase-js";
 
 const ENDPOINT =
   "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const STOCKS_FILE = path.join(WEB_ROOT, "src", "data", "stocks.ts");
-const PRICES_FILE = path.join(WEB_ROOT, "src", "data", "stock-prices.json");
+const TABLE = "stock_prices";
 
 function formatYmd(date) {
   return date.toISOString().slice(0, 10).replaceAll("-", "");
@@ -24,12 +25,6 @@ function decodeServiceKey(key) {
   } catch {
     return key;
   }
-}
-
-function mergeBars(existing, incoming) {
-  const byDate = new Map(existing.map((bar) => [bar.date, bar]));
-  for (const bar of incoming) byDate.set(bar.date, bar);
-  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 async function fetchWithRetry(url, attempts = 3) {
@@ -89,9 +84,27 @@ async function fetchBars(ticker, serviceKey, days) {
     }));
 }
 
+async function hasStoredBars(supabase, ticker) {
+  const { count, error } = await supabase
+    .from(TABLE)
+    .select("date", { count: "exact", head: true })
+    .eq("ticker", ticker);
+  if (error) throw error;
+  return Boolean(count);
+}
+
 async function main() {
   const serviceKey = process.env.PUBLIC_DATA_SERVICE_KEY?.trim();
   if (!serviceKey) throw new Error("PUBLIC_DATA_SERVICE_KEY is required.");
+
+  const supabaseUrl = process.env.SUPABASE_URL?.trim();
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
+  }
+  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { persistSession: false },
+  });
 
   const stocksSource = await readFile(STOCKS_FILE, "utf8");
   const tickers = [
@@ -99,19 +112,21 @@ async function main() {
   ];
   if (tickers.length === 0) throw new Error("No Korean stock tickers were found.");
 
-  const stored = JSON.parse(await readFile(PRICES_FILE, "utf8"));
   for (const ticker of tickers) {
     // The first run backfills roughly one year. Later runs revisit 30 days so
     // holidays, delayed publication, and temporarily failed runs are repaired.
-    const days = stored[ticker]?.length ? 30 : 400;
-    const incoming = await fetchBars(ticker, serviceKey, days);
-    stored[ticker] = mergeBars(stored[ticker] || [], incoming);
-    console.log(`${ticker}: ${incoming.length} fetched, ${stored[ticker].length} stored`);
-  }
+    const days = (await hasStoredBars(supabase, ticker)) ? 30 : 400;
+    const bars = await fetchBars(ticker, serviceKey, days);
+    if (bars.length === 0) {
+      console.log(`${ticker}: no bars fetched`);
+      continue;
+    }
 
-  const temporaryFile = `${PRICES_FILE}.tmp`;
-  await writeFile(temporaryFile, `${JSON.stringify(stored, null, 2)}\n`, "utf8");
-  await rename(temporaryFile, PRICES_FILE);
+    const rows = bars.map((bar) => ({ ticker, ...bar }));
+    const { error } = await supabase.from(TABLE).upsert(rows, { onConflict: "ticker,date" });
+    if (error) throw error;
+    console.log(`${ticker}: ${rows.length} bars upserted`);
+  }
 }
 
 await main();

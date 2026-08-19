@@ -1,6 +1,6 @@
 import "server-only";
 
-import storedPriceData from "@/data/stock-prices.json";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { PriceBar } from "@/lib/priceHistory";
 
 const ENDPOINT =
@@ -83,6 +83,34 @@ export function isKoreanStockTicker(ticker: string) {
   return /^\d{6}$/.test(ticker);
 }
 
+interface StockPriceRow {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number | string;
+}
+
+async function getStoredBars(ticker: string): Promise<PriceBar[]> {
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from("stock_prices")
+      .select("date, open, high, low, close, volume")
+      .eq("ticker", ticker)
+      .order("date", { ascending: true });
+    if (error) throw error;
+    // PostgREST returns bigint columns as strings to avoid precision loss.
+    return ((data ?? []) as StockPriceRow[]).map((row) => ({
+      ...row,
+      volume: Number(row.volume),
+    }));
+  } catch (error) {
+    console.error(`Supabase 저장 이력 조회 실패 (${ticker})`, error);
+    return [];
+  }
+}
+
 export async function getPublicStockPrices(
   ticker: string,
 ): Promise<PublicStockPrices> {
@@ -90,7 +118,7 @@ export async function getPublicStockPrices(
     throw new Error("국내 6자리 종목코드만 조회할 수 있습니다.");
   }
 
-  const storedBars = (storedPriceData as Record<string, PriceBar[]>)[ticker] ?? [];
+  const storedBars = await getStoredBars(ticker);
   const serviceKey = process.env.PUBLIC_DATA_SERVICE_KEY?.trim();
   if (!serviceKey) {
     if (storedBars.length > 0) return toPublicStockPrices(storedBars);
