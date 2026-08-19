@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "prices:update": "node --env-file=.env.local scripts/update-stock-prices.mjs"
+    "prices:update": "node --env-file=.env.local scripts/update-stock-prices.mjs",
+    "prices:migrate": "node --env-file=.env.local scripts/migrate-json-to-supabase.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4"
