@@ -93,6 +93,47 @@ async function hasStoredBars(supabase, ticker) {
   return Boolean(count);
 }
 
+async function updateTicker(supabase, serviceKey, ticker) {
+  // The first run backfills roughly one year. Later runs revisit 30 days so
+  // holidays, delayed publication, and temporarily failed runs are repaired.
+  const days = (await hasStoredBars(supabase, ticker)) ? 30 : 400;
+  const bars = await fetchBars(ticker, serviceKey, days);
+  if (bars.length === 0) {
+    console.log(`${ticker}: no bars fetched`);
+    return;
+  }
+
+  const rows = bars.map((bar) => ({ ticker, ...bar }));
+  const { error } = await supabase.from(TABLE).upsert(rows, { onConflict: "ticker,date" });
+  if (error) throw error;
+  console.log(`${ticker}: ${rows.length} bars upserted`);
+}
+
+// The catalog now covers every KOSPI/KOSDAQ ticker (thousands, not dozens),
+// so tickers are processed by a small worker pool instead of one at a time.
+// A per-ticker failure is logged and skipped rather than aborting the whole
+// run; the next scheduled run's 30-day window repairs anything missed.
+async function updateAllTickers(supabase, serviceKey, tickers, concurrency) {
+  let nextIndex = 0;
+  let failureCount = 0;
+
+  async function worker() {
+    while (nextIndex < tickers.length) {
+      const ticker = tickers[nextIndex];
+      nextIndex += 1;
+      try {
+        await updateTicker(supabase, serviceKey, ticker);
+      } catch (error) {
+        failureCount += 1;
+        console.error(`${ticker}: ${error.message}`);
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, worker));
+  return failureCount;
+}
+
 async function main() {
   const serviceKey = process.env.PUBLIC_DATA_SERVICE_KEY?.trim();
   if (!serviceKey) throw new Error("PUBLIC_DATA_SERVICE_KEY is required.");
@@ -108,24 +149,16 @@ async function main() {
 
   const stocksSource = await readFile(STOCKS_FILE, "utf8");
   const tickers = [
-    ...new Set([...stocksSource.matchAll(/ticker:\s*"(\d{6})"/g)].map((match) => match[1])),
+    ...new Set(
+      [...stocksSource.matchAll(/ticker:\s*"([0-9A-Z]{6})"/g)].map((match) => match[1]),
+    ),
   ];
   if (tickers.length === 0) throw new Error("No Korean stock tickers were found.");
 
-  for (const ticker of tickers) {
-    // The first run backfills roughly one year. Later runs revisit 30 days so
-    // holidays, delayed publication, and temporarily failed runs are repaired.
-    const days = (await hasStoredBars(supabase, ticker)) ? 30 : 400;
-    const bars = await fetchBars(ticker, serviceKey, days);
-    if (bars.length === 0) {
-      console.log(`${ticker}: no bars fetched`);
-      continue;
-    }
-
-    const rows = bars.map((bar) => ({ ticker, ...bar }));
-    const { error } = await supabase.from(TABLE).upsert(rows, { onConflict: "ticker,date" });
-    if (error) throw error;
-    console.log(`${ticker}: ${rows.length} bars upserted`);
+  const concurrency = Number(process.env.PRICE_UPDATE_CONCURRENCY) || 8;
+  const failureCount = await updateAllTickers(supabase, serviceKey, tickers, concurrency);
+  if (failureCount > 0) {
+    throw new Error(`${failureCount} of ${tickers.length} ticker(s) failed to update.`);
   }
 }
 
